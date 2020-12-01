@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<b-container>
+		<b-container fluid>
 
 			<b-row class="mt-4">
                 <b-col>
@@ -63,7 +63,7 @@
 						</template>
 
 						<template v-slot:cell(clasificacion)="data">
-							<div :style="'background-color: ' + data.item.color + '; width: 20px; height: 20px; display: inline-block'" v-b-tooltip.hover :title="data.item.nombre_clasificacion"></div>
+							<div :style="'background-color: ' + data.item.color + '; width: 20px; height: 20px; display: inline-block'"></div>
 						</template>
 
 						<template v-slot:cell(action)="data">

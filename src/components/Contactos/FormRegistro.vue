@@ -117,12 +117,30 @@
                     </b-col>
                     <b-col cols="4">
                         <b-form-group label="Fecha de Nacimiento" label-class="font-weight-bold">
-                            <b-form-input
-                                type="date"
-                                autocomplete="off"
-                                v-model="persona.fecha_nacimiento"
+                            <date-picker :disabled="readOnly" v-model="persona.fecha_nacimiento" :config="options_nacimiento"></date-picker>
+                        </b-form-group>
+                    </b-col>
+                    <b-col cols="4">
+                        <b-form-group label="Mes de Cumpleaños" label-class="font-weight-bold">
+                            <date-picker :disabled="readOnly" v-model="persona.mes_cumple" :config="options"></date-picker>
+                        </b-form-group>
+                    </b-col>
+                    <b-col cols="4">
+                        <b-form-group label="Rango de Edad" label-class="font-weight-bold">
+                            <b-form-select
+                                v-model="persona.rango"
+                                :options="select_rangos"
                                 :disabled="readOnly"
-                            ></b-form-input>
+                                value-field="id"
+                                text-field="rango"
+                            >
+                                <template v-slot:first>
+                                    <b-form-select-option :value="null" disabled
+                                        >-- Seleccione una opción
+                                        --</b-form-select-option
+                                    >
+                                </template>
+                            </b-form-select>
                         </b-form-group>
                     </b-col>
                     <b-col cols="4">
@@ -165,7 +183,6 @@
                                 v-model="persona.zona"
                                 :options="select_zona"
                                 :disabled="readOnly"
-                                @change="zona_select()"
                                 required
                             >
                                 <template v-slot:first>
@@ -255,17 +272,16 @@
                             ></b-form-select>
                         </b-form-group>
                     </b-col>
-                    <b-col cols="3">
+                    <b-col cols="4">
                         <b-form-group label="Clasificación" label-class="font-weight-bold">
-                            <b-dropdown text="Seleccione una opción" variant="outline-secondary" toggle-class="text-decoration-none" no-caret block>
+                            <!-- <b-dropdown :disabled="!persona.zona" text="Seleccione una opción" variant="outline-secondary" toggle-class="text-decoration-none" no-caret block>
                                 <template v-slot:button-content>
                                     <span v-if="!persona.clasificacion">Seleccione una opción</span>
                                     <b-row v-if="persona.clasificacion">
                                         <b-col cols="2">
-                                            <div :style="'background-color: ' + persona.clasificacion.color + '; width: 10px; height: 10px; display: inline-block'"></div>
+                                            <div :style="'background-color: ' + persona.clasificacion.color + '; width: 30px; height: 15px; display: inline-block'"></div>
                                         </b-col>
                                         <b-col class="text-left">
-                                            {{ persona.clasificacion.nombre }}
                                         </b-col>
                                     </b-row>
                                 </template>
@@ -280,7 +296,24 @@
                                     </b-row>
                                     
                                 </b-dropdown-item>
-                            </b-dropdown>
+                            </b-dropdown> -->
+                                <b-form-radio-group required v-model="persona.clasificacion" name="radio-sub-component">
+                                    <b-form-radio size="lg" :value="clasificacion.id"  v-for="(clasificacion, key) in clasificaciones_zona" :key="key">
+                                        <div :style="'background-color: ' + clasificacion.color + '; width: 15px; height: 15px; display: inline-block'"></div>
+                                    </b-form-radio>
+                                    <!-- <b-form-radio value="second">Or  radio</b-form-radio>
+                                    <b-form-radio value="third" disabled>This one is Disabled</b-form-radio>
+                                    <b-form-radio :value="{ fourth: 4 }">This is the 4th radio</b-form-radio> -->
+                            </b-form-radio-group>
+                        </b-form-group>
+                    </b-col>
+                    <b-col>
+                        <b-form-group label="Observaciones" label-class="font-weight-bold">
+                            <b-form-textarea
+                                v-model="persona.observaciones"
+                                :disabled="readOnly"
+                                autocomplete="off"
+                            ></b-form-textarea>
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -308,211 +341,242 @@
 </template>
 
 <script>
-export default {
-    name: 'FormRegistro',
-    props: {
-        showModal: {
-            type: Boolean,
-            default: false
+
+    import datePicker from 'vue-bootstrap-datetimepicker';
+    import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css';
+
+    export default {
+        name: 'FormRegistro',
+        components: {
+            datePicker
         },
-        editMode: {
-            type: Boolean,
-            default: false
-        },
-        idPersona: {
-            type: Number,
-            default: null
-        },
-        readOnly: {
-            type: Boolean,
-            default: false
-        },
-        titleModal: {
-            type: String,
-            default: ''
-        }
-    },
-    data(){
-        return{
-            showModal5: false,
-            profesiones: [],
-			vias_contacto: [],
-			persona: {
-                id_tipo: null,
-				nombre: null,
-				apellido: null,
-				apellido_casada: null,
-				estado_civil: null,
-				genero: null,
-				fecha_nacimiento: null,
-				no_dpi: null,
-				direccion: null,
-				no_casa: null,
-				zona: null,
-				colonia: null,
-				habitantes: null,
-				referido_por: null,
-				profesion: null,
-				motivo: null,
-				status: "A",
-                edit: false,
-                clasificacion: {}
-			},
-			select_estado: [
-				{ value: "S", text: "Soltero(a)" },
-				{ value: "C", text: "Casado(a)" }
-			],
-			select_genero: [
-				{ value: "M", text: "Masculino" },
-				{ value: "F", text: "Femenino" }
-			],
-			select_status: [
-				{ value: "A", text: "Activo" },
-				{ value: "I", text: "Inactivo" }
-			],
-            select_zona: [],
-            select_tipo: [],
-            clasificaciones_zona: []
-        }
-    },
-    methods: {
-        reset() {
-            this.persona = {
-                id_tipo: null,
-                nombre: null,
-                apellido: null,
-                apellido_casada: null,
-                estado_civil: null,
-                genero: null,
-                fecha_nacimiento: null,
-                no_dpi: null,
-                direccion: null,
-                no_casa: null,
-                zona: null,
-                colonia: null,
-                habitantes: null,
-                referido_por: null,
-                profesion: null,
-                motivo: null,
-                status: "A",
-                edit: false,
-            };
-        },
-        registrar() {
-
-            this.axios
-            .post(process.env.VUE_APP_API_URL + "registrar", this.persona)
-            // eslint-disable-next-line no-unused-vars
-            .then(response => {
-                // eslint-disable-next-line no-undef
-                Swal.fire(
-                    "Excelente!",
-                    "La persona ha sido registrada!",
-                    "success"
-                ).then(() => {
-                    this.listar()
-                    this.closeModal()
-                });
-            });
-        },
-        editar() {
-            this.axios
-            .post(
-                process.env.VUE_APP_API_URL + "actualizar_persona",
-                this.persona
-            )
-            // eslint-disable-next-line no-unused-vars
-            .then(response => {
-                // eslint-disable-next-line no-undef
-                Swal.fire(
-                    "Excelente!",
-                    "La persona ha sido actualizada!",
-                    "success"
-                ).then(() => {
-                    this.listar()
-                    this.closeModal()
-                });
-            });
-        },
-        closeModal() {
-            this.$emit('closeModal')
-        },
-        detalle(id) {
-
-            this.axios
-            .get(process.env.VUE_APP_API_URL + "detalle_persona/" + id)
-            .then(response => {
-                this.persona = response.data.detalle;
-                this.clasificaciones_zona = response.data.clasificacion
-                this.persona.edit = true;
-            });
-
-        },
-        listar(){
-            this.$emit('listar')
-        },
-        zona_select(){
-
-            this.axios
-            .get(process.env.VUE_APP_API_URL + "obtener_clasificaciones/" + 1)
-            .then(response => {
-                this.clasificaciones_zona = response.data
-            });
-
-        },
-        select_clasificacion(id){
-
-            this.persona.clasificacion = id
-
-        }
-    },
-    watch: {
-        showModal(val) {
-
-            if (val) {
-                
-                this.reset()
-
-                this.axios
-                .get(process.env.VUE_APP_API_URL + "profesiones")
-                .then(response => {
-                    this.profesiones = response.data;
-                });
-
-                // Obtener vias de contacto
-
-                this.axios
-                .get(process.env.VUE_APP_API_URL + "vias_contacto")
-                .then(response => {
-                    this.vias_contacto = response.data;
-                });
-
-                // Zonas del usuario
-
-                let usuario = JSON.parse(localStorage.getItem('usuario'));
-
-                this.axios
-                .get(process.env.VUE_APP_API_URL + "zonas_usuario/" + usuario.id)
-                .then(response => {
-                    this.select_zona = response.data
-                });
-
-                // Tipos de contactos
-                 this.axios
-                .get(process.env.VUE_APP_API_URL + "tipos_contactos")
-                .then(response => {
-                    this.select_tipo = response.data
-                });
-
-                if (this.idPersona) {
-                    
-                    this.detalle(this.idPersona)
-
-                }
+        props: {
+            showModal: {
+                type: Boolean,
+                default: false
+            },
+            editMode: {
+                type: Boolean,
+                default: false
+            },
+            idPersona: {
+                type: Number,
+                default: null
+            },
+            readOnly: {
+                type: Boolean,
+                default: false
+            },
+            titleModal: {
+                type: String,
+                default: ''
             }
+        },
+        data(){
+            return{
+                showModal5: false,
+                profesiones: [],
+                vias_contacto: [],
+                persona: {
+                    id_tipo: null,
+                    nombre: null,
+                    apellido: null,
+                    apellido_casada: null,
+                    estado_civil: null,
+                    genero: null,
+                    fecha_nacimiento: null,
+                    no_dpi: null,
+                    direccion: null,
+                    no_casa: null,
+                    zona: null,
+                    colonia: null,
+                    habitantes: null,
+                    referido_por: null,
+                    profesion: null,
+                    motivo: null,
+                    status: "A",
+                    edit: false,
+                    clasificacion: null,
+                    rango: null
+                },
+                select_estado: [
+                    { value: "S", text: "Soltero(a)" },
+                    { value: "C", text: "Casado(a)" }
+                ],
+                select_genero: [
+                    { value: "M", text: "Masculino" },
+                    { value: "F", text: "Femenino" }
+                ],
+                select_status: [
+                    { value: "A", text: "Activo" },
+                    { value: "I", text: "Inactivo" }
+                ],
+                select_zona: [],
+                select_tipo: [],
+                select_rangos: [],
+                clasificaciones_zona: [],
+                options: {
+                    format: 'M',
+                    useCurrent: false,
+                    locale: 'es'
+                },
+                options_nacimiento: {
+                    format: 'DD/MM/YYYY',
+                    useCurrent: false,
+                    locale: 'es'
+                }    
+            }
+        },
+        methods: {
+            reset() {
+                this.persona = {
+                    id_tipo: null,
+                    nombre: null,
+                    apellido: null,
+                    apellido_casada: null,
+                    estado_civil: null,
+                    genero: null,
+                    fecha_nacimiento: null,
+                    no_dpi: null,
+                    direccion: null,
+                    no_casa: null,
+                    zona: null,
+                    colonia: null,
+                    habitantes: null,
+                    referido_por: null,
+                    profesion: null,
+                    motivo: null,
+                    status: "A",
+                    edit: false,
+                    rango: null,
+                    clasificacion: null
+                };
+            },
+            registrar() {
 
-            this.showModal5 = val;
-        }
-    },
-};
+                let usuario = JSON.parse(localStorage.getItem('usuario'))
+
+                this.persona.usuario_registro = usuario.id
+
+                this.axios
+                .post(process.env.VUE_APP_API_URL + "registrar", this.persona)
+                // eslint-disable-next-line no-unused-vars
+                .then(response => {
+                    // eslint-disable-next-line no-undef
+                    Swal.fire(
+                        "Excelente!",
+                        "La persona ha sido registrada!",
+                        "success"
+                    ).then(() => {
+                        this.listar()
+                        this.closeModal()
+                    });
+                });
+            },
+            editar() {
+                this.axios
+                .post(
+                    process.env.VUE_APP_API_URL + "actualizar_persona",
+                    this.persona
+                )
+                // eslint-disable-next-line no-unused-vars
+                .then(response => {
+                    // eslint-disable-next-line no-undef
+                    Swal.fire(
+                        "Excelente!",
+                        "La persona ha sido actualizada!",
+                        "success"
+                    ).then(() => {
+                        this.listar()
+                        this.closeModal()
+                    });
+                });
+            },
+            closeModal() {
+                this.$emit('closeModal')
+            },
+            detalle(id) {
+
+                this.axios
+                .get(process.env.VUE_APP_API_URL + "detalle_persona/" + id)
+                .then(response => {
+                    this.persona = response.data.detalle;
+                    this.clasificaciones_zona = response.data.clasificacion
+                    this.persona.edit = true;
+                });
+
+            },
+            listar(){
+                this.$emit('listar')
+            },
+            select_clasificacion(id){
+
+                this.persona.clasificacion = id
+
+            }
+        },
+        watch: {
+            showModal(val) {
+
+                if (val) {
+                    
+                    this.reset()
+
+                    this.axios
+                    .get(process.env.VUE_APP_API_URL + "profesiones")
+                    .then(response => {
+                        this.profesiones = response.data;
+                    });
+
+                    // Obtener vias de contacto
+
+                    this.axios
+                    .get(process.env.VUE_APP_API_URL + "vias_contacto")
+                    .then(response => {
+                        this.vias_contacto = response.data;
+                    });
+
+                    // Zonas del usuario
+
+                    let usuario = JSON.parse(localStorage.getItem('usuario'));
+
+                    this.axios
+                    .get(process.env.VUE_APP_API_URL + "zonas_usuario/" + usuario.id)
+                    .then(response => {
+                        this.select_zona = response.data
+                    });
+
+                    // Tipos de contactos
+                    this.axios
+                    .get(process.env.VUE_APP_API_URL + "tipos_contactos")
+                    .then(response => {
+                        this.select_tipo = response.data
+                    });
+
+                    // Rangos de edad
+                    this.axios
+                    .get(process.env.VUE_APP_API_URL + "obtener_rangos")
+                    .then(response => {
+                        // this.select_tipo = response.data
+                        this.select_rangos = response.data
+                    });
+
+                    // Clasificaciones
+                    this.axios
+                    .get(process.env.VUE_APP_API_URL + "obtener_clasificaciones/" + 1)
+                    .then(response => {
+                        this.clasificaciones_zona = response.data
+                    });
+
+                    if (this.idPersona) {
+                        
+                        this.detalle(this.idPersona)
+
+                    }
+                }
+
+                this.showModal5 = val;
+            }
+        },
+    };
 </script>
