@@ -9,19 +9,23 @@
   },
   "dependencies": {
     "@alfsnd/vue-bootstrap-select": "^0.4.4",
+    "@amcharts/amcharts4": "^4.10.12",
     "@fortawesome/fontawesome-svg-core": "^1.2.27",
     "@fortawesome/free-solid-svg-icons": "^5.12.1",
     "@fortawesome/vue-fontawesome": "^0.1.9",
     "axios": "^0.19.2",
+    "bootstrap": "^4.5.3",
+    "bootstrap-vue": "^2.20.1",
     "core-js": "^3.6.4",
     "highcharts": "^8.0.0",
     "register-service-worker": "^1.6.2",
-    "vue": "^2.6.11",
+    "vue": "^2.6.12",
     "vue-axios": "^2.1.5",
     "vue-bootstrap-datetimepicker": "^5.0.1",
     "vue-cal": "^2.24.7",
     "vue-multiselect": "^2.1.6",
     "vue-router": "^3.1.5",
+    "vue-server-renderer": "^2.6.12",
     "vuex": "^3.1.2"
   },
   "devDependencies": {
@@ -32,6 +36,6 @@
     "babel-eslint": "^10.0.3",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.1.2",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.12"
   }
 }
