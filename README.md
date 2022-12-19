@@ -1,4 +1,6 @@
-# app_crm_2
+# App CRM (Segundo Enfoque)
+
+Aplicación dedicada en la recopilación de información de los vecinos (segundo enfoque)
 
 ## Project setup
 ```
